@@ -1,0 +1,51 @@
+N = 5 
+
+real	0m4.699s
+user	0m0.559s
+sys	0m3.769s
+N = 10 
+
+real	0m4.780s
+user	0m0.574s
+sys	0m3.826s
+N = 15 
+
+real	0m4.912s
+user	0m0.581s
+sys	0m3.944s
+N = 20 
+
+real	0m4.899s
+user	0m0.751s
+sys	0m3.783s
+N = 25 
+
+real	0m4.997s
+user	0m0.697s
+sys	0m3.889s
+N = 30 
+
+real	0m4.980s
+user	0m0.761s
+sys	0m3.837s
+N = 35 
+
+real	0m7.924s
+user	0m3.746s
+sys	0m3.787s
+N = 40 
+
+real	0m8.336s
+user	0m4.075s
+sys	0m3.871s
+N = 45 
+
+real	0m8.468s
+user	0m4.322s
+sys	0m3.771s
+N = 50 
+
+real	0m9.032s
+user	0m4.875s
+sys	0m3.802s
+

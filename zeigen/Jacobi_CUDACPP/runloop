@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for i in `seq 4 4 32`
+do
+time ./main.x $i
+done
