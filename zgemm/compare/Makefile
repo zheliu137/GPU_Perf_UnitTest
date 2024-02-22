@@ -1,6 +1,6 @@
 LIBS+=-L/usr/local/cuda/lib64 -lcudart -lcublas -lcurand
 
-LIBS_CPU+=-qmkl
+LIBS_CPU+=-mkl
 
 objects:= cublas_kernel.o \
   		  curand_kernel.o \

@@ -1,0 +1,10 @@
+4 diag 100000 4 by 4 matrices in 3.6962E-01s. Average 3.6961579323E-06s for each.
+8 diag 100000 8 by 8 matrices in 7.1365E-01s. Average 7.1364617348E-06s for each.
+12 diag 100000 12 by 12 matrices in 1.7337E+00s. Average 1.7337424755E-05s for each.
+16 diag 100000 16 by 16 matrices in 3.8058E+00s. Average 3.8057644367E-05s for each.
+20 diag 100000 20 by 20 matrices in 8.7699E+00s. Average 8.7699284554E-05s for each.
+24 diag 100000 24 by 24 matrices in 1.4773E+01s. Average 1.4773087978E-04s for each.
+28 diag 100000 28 by 28 matrices in 2.5459E+01s. Average 2.5458592653E-04s for each.
+32 diag 100000 32 by 32 matrices in 4.0376E+01s. Average 4.0375521421E-04s for each.
+36 diag 100000 36 by 36 matrices in 6.7210E+01s. Average 6.7209649801E-04s for each.
+40 diag 100000 40 by 40 matrices in 1.0090E+02s. Average 1.0090080810E-03s for each.

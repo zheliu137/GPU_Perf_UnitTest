@@ -20,8 +20,8 @@ int main (int argc, char* argv[]){
     cuDoubleComplex *A;
     //double *A;
     int N=16;
-    int nmat = 2000000;
-    int batchsize = 10000;
+    int nmat = 200000;
+    int batchsize = 20000;
     if (argc > 1 ){
       N = strtol(argv[1],nullptr,0);
     }

@@ -13,6 +13,8 @@
 //#define DEBUG
 //#define SINGLERUN
 
+void createRandoms_gpu(int length_in_double, double *randomArray);
+
 int cusolver_c_batch(const int m, cuDoubleComplex *A_, const int nmat, const int batchSize, const double tol_) {
 
     const int lda = m;
@@ -26,6 +28,7 @@ int cusolver_c_batch(const int m, cuDoubleComplex *A_, const int nmat, const int
     //std::vector<cuDoubleComplex> V(lda * m * nmat); // eigenvectors
     //std::vector<double> W(m*nmat);       // eigenvalues
     //printf("Allocate pinned memory.\n");
+    printf("----------------------------------------------------\n");
     printf("solving %d %dx%d matrices by Jacobi method, with tol = %g\n",nmat,m,m,tol_);
     cuDoubleComplex *A; // matrix stored in pinned memory
     CUDA_CHECK(cudaMallocHost((void **)&A,sizeof(cuDoubleComplex)*lda * m * batchSize));
@@ -55,7 +58,7 @@ int cusolver_c_batch(const int m, cuDoubleComplex *A_, const int nmat, const int
     const cublasFillMode_t uplo = CUBLAS_FILL_MODE_LOWER;
 
     cudaEvent_t start, stop;
-    float elapsed_time;
+    float elapsed_time, elapsed_time_sum;
     CUDA_CHECK(cudaEventCreate(&start));
     CUDA_CHECK(cudaEventCreate(&stop));
 
@@ -97,19 +100,20 @@ int cusolver_c_batch(const int m, cuDoubleComplex *A_, const int nmat, const int
 );
     /* step 5: compute eigen-pair   */
 
-    CUDA_CHECK(cudaEventRecord(start,stream));
-
+    elapsed_time_sum = 0.0;
 
     for (int j=0; j<nbatch; j++){ 
-    CUSOLVER_CHECK(cusolverDnZheevjBatched(cusolverH, jobz, uplo, m, 
-                    d_A, lda, d_W, d_work, lwork, devInfo, syevj_params, batchSize));
+        createRandoms_gpu(m*m*2*batchSize, (double *)d_A);
+        CUDA_CHECK(cudaEventRecord(start,stream));
+        CUSOLVER_CHECK(cusolverDnZheevjBatched(cusolverH, jobz, uplo, m, 
+                        d_A, lda, d_W, d_work, lwork, devInfo, syevj_params, batchSize));
+        CUDA_CHECK(cudaEventRecord(stop,stream));
+        CUDA_CHECK(cudaEventSynchronize(stop));
+        CUDA_CHECK(cudaEventElapsedTime(&elapsed_time, start, stop));
+        elapsed_time_sum+=elapsed_time;
     }
 
-    CUDA_CHECK(cudaEventRecord(stop,stream));
-    CUDA_CHECK(cudaEventSynchronize(stop));
-    CUDA_CHECK(cudaEventElapsedTime(&elapsed_time, start, stop));
-
-    printf("batchsize: %d, nbatch: %d, CUDA event time: %gs, avg time per diag : %g \n",batchSize, nbatch,elapsed_time/1000.0,elapsed_time/1000.0/double(batchSize*nbatch));
+    printf("batchsize: %d, nbatch: %d, CUDA event time: %gs, avg time per diag : %g \n",batchSize, nbatch,elapsed_time_sum/1000.0,elapsed_time_sum/1000.0/double(batchSize*nbatch));
 
     // step 6: check status, show eigenvalues, and eigenvectors 
       

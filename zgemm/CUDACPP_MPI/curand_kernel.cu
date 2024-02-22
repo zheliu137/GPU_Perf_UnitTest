@@ -16,10 +16,3 @@ void createRandoms(int size, double *h_randomArray){
     curandGenerateUniformDouble(generator,randomArray,size*size);
     cudaMemcpy(h_randomArray, randomArray, sizeof(double) * size * size, cudaMemcpyDeviceToHost);
 }
-
-void createRandoms_gpu(int length_in_double, double *randomArray){
-    curandGenerator_t generator;
-    curandCreateGenerator(&generator,CURAND_RNG_PSEUDO_XORWOW);
-    curandSetPseudoRandomGeneratorSeed(generator,(int)time(NULL));
-    curandGenerateUniformDouble(generator,randomArray,length_in_double);
-}
