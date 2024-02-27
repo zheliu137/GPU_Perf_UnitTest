@@ -10,19 +10,27 @@
 #include "cuda_settings.h"
 #define IDX2F(i,j,ld) ((((j))*(ld))+((i)))
 #define BLOCK_SIZE 32
-#define BLOCK_SIZE_1D 512
+#define BLOCK_SIZE_1D 1024
 
 //void print_matrix(const int &m, const int &n, const cuDoubleComplex *A, const int &lda);
 void createRandoms(int size, double *randomArray);
 
-__global__ void ArrayAdd( ComplexD *A, ComplexD *B, ComplexD *C, int length ){
+__global__ void ArrayAdd( ComplexD *A, ComplexD *B, ComplexD *C, int length, int nloop ){
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if( idx<length ){
-      A[idx] = B[idx] + C[idx];
+      // to be optimized
+      for ( int iloop=0;iloop<nloop;iloop++){
+        A[idx] += B[idx] + C[idx];
+      }
     }
 }
 
 int main (int argc, char* argv[]){
+
+    // CUDA_CHECK(cudaGetDeviceProperties());
+
+    int device = 0;
+    CUDA_CHECK(cudaSetDevice(device));
 
     cudaStream_t stream;
 
@@ -30,7 +38,7 @@ int main (int argc, char* argv[]){
     cuDoubleComplex *B, *C;
     cuDoubleComplex *d_A, *d_B, *d_C;
     int arraylen = 1000000;
-    int nbatch = 2000;
+    int nloop = 200;
     // int batchsize = 20000;
     if (argc > 1 ){
       arraylen = strtol(argv[1], nullptr, 0);
@@ -56,6 +64,7 @@ int main (int argc, char* argv[]){
     createRandoms(N, rand2);
     for (int i=0;i<N;i++){
       C[i] = {rand1[i],rand2[i]};
+      // C[i] = {1.5,1.5};
     } 
 
     CUDA_CHECK(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
@@ -64,6 +73,7 @@ int main (int argc, char* argv[]){
     CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_B), N*sizeof(cuDoubleComplex)));
     CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_C), N*sizeof(cuDoubleComplex)));
 
+    CUDA_CHECK(cudaMemset(d_A, 0, N*sizeof(cuDoubleComplex)));
     CUDA_CHECK(cudaMemcpy(d_B, B, N*sizeof(cuDoubleComplex), cudaMemcpyHostToDevice ));
     CUDA_CHECK(cudaMemcpy(d_C, C, N*sizeof(cuDoubleComplex), cudaMemcpyHostToDevice ));
 
@@ -75,20 +85,31 @@ int main (int argc, char* argv[]){
 
     elapsed_time_sum=0.0;
     CUDA_CHECK(cudaEventRecord(start, stream));
-    for (int j=0; j<nbatch; j++){ 
-      dim3 block_dim = BLOCK_SIZE_1D;
-      dim3 grid_dim;
-      grid_dim.x = (block_dim.x-1)/arraylen;
-      ArrayAdd<<<grid_dim, block_dim>>>((ComplexD*)d_A, (ComplexD*)d_B, (ComplexD*)d_C, arraylen);
-    }
+    // for (int j=0; j<nloop; j++){ 
+    dim3 block_dim = BLOCK_SIZE_1D;
+    // dim3 block_dim = 32;
+    dim3 grid_dim;
+    grid_dim.x = (arraylen+block_dim.x-1)/block_dim.x;
+    printf("%d %d\n", grid_dim.x,block_dim.x);
+    ArrayAdd<<<grid_dim, block_dim>>>((ComplexD*)d_A, (ComplexD*)d_B, (ComplexD*)d_C, arraylen, nloop);
+    // ArrayAdd<<<grid_dim, block_dim>>>(arraylen, nloop);
+    CUDA_CHECK(cudaGetLastError());
+    // }
     CUDA_CHECK(cudaEventRecord(stop, stream));
     CUDA_CHECK(cudaEventSynchronize(stop));
     CUDA_CHECK(cudaEventElapsedTime(&elapsed_time, start, stop));
     elapsed_time_sum+=elapsed_time;
+    CUDA_CHECK(cudaDeviceSynchronize());
 
-    // printf("Array Length: %d, nbatch: %d, CUDA event time: %gs, avg time for each sum : %gs \n", arraylen, nbatch, elapsed_time_sum/1000.0, elapsed_time_sum/1000.0/double(arraylen*nbatch));
-    printf("Array Length: %d, nbatch: %d, CUDA event time: %gs, avg time for each array : %gs \n", arraylen, nbatch, elapsed_time_sum/1000.0, elapsed_time_sum/1000.0/double(nbatch));
+    double ms2s=0.001;
+    double avgfac=1.0/double(arraylen)/double(nloop);
+    // printf("Avgfac test : %g %g %g %g \n", double(long(arraylen)*long(nloop)), 1/double(arraylen*nloop), 1.0/double(arraylen*nloop), 1.0/double(arraylen)/double(nloop));
+    printf("Array Length: %d, nloop: %d, CUDA event time: %gs, avg time for each sum : %gs \n", arraylen, nloop, elapsed_time_sum/1000.0, elapsed_time_sum*ms2s*avgfac);
+    // printf("Array Length: %d, nloop: %d, CUDA event time: %gs, avg time for each array 1 loop : %gs \n", arraylen, nloop, elapsed_time_sum/1000.0, elapsed_time_sum/1000.0/double(nloop));
 
+    // CUDA_CHECK(cudaMemcpy(A, d_A, N*sizeof(cuDoubleComplex), cudaMemcpyDeviceToHost ));
+
+    // printf("The value of A[%d] is %30.15g + %30.15g i \n", 12000, A[11999].x, A[11999].y);
     /*
     */
 }

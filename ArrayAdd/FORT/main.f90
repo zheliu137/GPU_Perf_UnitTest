@@ -58,8 +58,10 @@ program ArrayAdd
     t_end = f_wall()
     t = t_end - t_start
 
-    write(*,'(" arrayadd ", I10,  " arrays", I12, " times in ", ES15.5, "s. Average ", ES20.10, "s for each array.")') &
-        arraylen, nloop, t, t/nloop
+    ! write(*,'(" arrayadd ", I10,  " arrays", I12, " times in ", ES15.5, "s. Average ", ES20.10, "s for each array.")') &
+    !     arraylen, nloop, t, t/nloop
+    write(*,'(" arrayadd ", I10,  " arrays", I12, " times in ", ES15.5, "s. Average ", ES20.10, "s for each sum.")') &
+        arraylen, nloop, t, t/nloop/arraylen
 
 
 
