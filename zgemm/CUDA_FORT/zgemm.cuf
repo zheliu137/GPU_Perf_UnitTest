@@ -1,6 +1,9 @@
 program testisamax
     ! Compile with "pgfortran testisamax.cuf -Mcudalib=cublas -lblas"
     ! Use the NVIDIA cudafor and cublas modules
+    !
+    ! TODO: change isamax into zgemm
+    !
     use cudafor
     use cublas
     !

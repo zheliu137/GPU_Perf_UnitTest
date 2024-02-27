@@ -1,7 +1,0 @@
-16 batchsize: 2000000000, CUDA event time: 61.85s, avg time per matmul : 3.0925e-08
-17 batchsize: 2000000000, CUDA event time: 85.239s, avg time per matmul : 4.26195e-08
-18 batchsize: 2000000000, CUDA event time: 85.634s, avg time per matmul : 4.2817e-08
-19 batchsize: 2000000000, CUDA event time: 87.1396s, avg time per matmul : 4.35698e-08
-20 batchsize: 2000000000, CUDA event time: 87.4436s, avg time per matmul : 4.37218e-08
-21 batchsize: 2000000000, CUDA event time: 89.3481s, avg time per matmul : 4.46741e-08
-22 batchsize: 2000000000, CUDA event time: 92.1831s, avg time per matmul : 4.60916e-08
