@@ -1,0 +1,15 @@
+100000 arrayadd 100000 arrays 100 times in 6.18315E-03s. Average 6.1831474304E-10s for each sum.
+1000000 arrayadd 1000000 arrays 100 times in 6.17449E-02s. Average 6.1744928360E-10s for each sum.
+10000000 arrayadd 10000000 arrays 100 times in 6.17060E-01s. Average 6.1705994606E-10s for each sum.
+100000000 arrayadd 100000000 arrays 100 times in 6.20061E+00s. Average 6.2006139755E-10s for each sum.
+100000 arrayadd 100000 arrays 1000 times in 8.89671E-02s. Average 8.8967084885E-10s for each sum.
+1000000 arrayadd 1000000 arrays 1000 times in 8.97231E-01s. Average 8.9723086357E-10s for each sum.
+10000000 arrayadd 10000000 arrays 1000 times in 9.13093E+00s. Average 9.1309258938E-10s for each sum.
+100000000 arrayadd 100000000 arrays 1000 times in 9.08568E+01s. Average 9.0856833935E-10s for each sum.
+100000 arrayadd 100000 arrays 10000 times in 1.00578E+00s. Average 1.0057840347E-09s for each sum.
+1000000 arrayadd 1000000 arrays 10000 times in 9.72335E+00s. Average 9.7233541012E-10s for each sum.
+10000000 arrayadd 10000000 arrays 10000 times in 9.67038E+01s. Average 9.6703760862E-10s for each sum.
+100000000 arrayadd 100000000 arrays 10000 times in 9.61158E+02s. Average 9.6115828395E-10s for each sum.
+100 arrayadd 100 arrays 10000 times in 8.86202E-04s. Average 8.8620185852E-10s for each sum.
+1000 arrayadd 1000 arrays 10000 times in 8.89897E-03s. Average 8.8989734650E-10s for each sum.
+10000 arrayadd 10000 arrays 10000 times in 8.86002E-02s. Average 8.8600158691E-10s for each sum.
