@@ -54,7 +54,6 @@ int main (int argc, char* argv[]){
     createRandoms(N, rand2);
     for (int i=0;i<N;i++){
       C[i] = {rand1[i],rand2[i]};
-      // C[i] = {1.5,1.5};
     } 
 
     CUDA_CHECK(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
@@ -73,20 +72,22 @@ int main (int argc, char* argv[]){
     CUDA_CHECK(cudaEventCreate(&start));
     CUDA_CHECK(cudaEventCreate(&stop));
 
+    cublasHandle_t blasHandle;
+    static const cuDoubleComplex cone = {1.0, 0.0}, czero = {0.0, 0.0};
+
+    CUBLAS_CHECK(cublasCreate(&blasHandle));
+    
     elapsed_time_sum=0.0;
     CUDA_CHECK(cudaEventRecord(start, stream));
-
-    // for (int j=0; j<nloop; j++){ 
-
-    //
-    //
-    //
-    // CUBLAS_CHECK(cublasZgemv)
-    //
-    //
+    for (int j=0; j<nloop; j++){ 
+      // cublasStatus_t cublasZaxpy(cublasHandle_t handle, int n,
+      //                      const cuDoubleComplex *alpha,
+      //                      const cuDoubleComplex *x, int incx,
+      //                      cuDoubleComplex       *y, int incy)
+      CUBLAS_CHECK(cublasZaxpy(blasHandle, arraylen, &cone, d_B, 1, d_A, 1 ));      
+      CUBLAS_CHECK(cublasZaxpy(blasHandle, arraylen, &cone, d_C, 1, d_A, 1 ));            
+    }
     CUDA_CHECK(cudaGetLastError());
-
-    // }
 
     CUDA_CHECK(cudaEventRecord(stop, stream));
     CUDA_CHECK(cudaEventSynchronize(stop));
@@ -99,7 +100,6 @@ int main (int argc, char* argv[]){
     // printf("Avgfac test : %g %g %g %g \n", double(long(arraylen)*long(nloop)), 1/double(arraylen*nloop), 1.0/double(arraylen*nloop), 1.0/double(arraylen)/double(nloop));
     printf("Array Length: %d, nloop: %d, CUDA event time: %gs, avg time for each sum : %gs \n", arraylen, nloop, elapsed_time_sum/1000.0, elapsed_time_sum*ms2s*avgfac);
     // printf("Array Length: %d, nloop: %d, CUDA event time: %gs, avg time for each array 1 loop : %gs \n", arraylen, nloop, elapsed_time_sum/1000.0, elapsed_time_sum/1000.0/double(nloop));
-
     CUDA_CHECK(cudaMemcpy(A, d_A, N*sizeof(cuDoubleComplex), cudaMemcpyDeviceToHost ));
 
     printf("The value of A[%d] is %30.15g + %30.15g i \n", 12000, A[11999].x, A[11999].y);

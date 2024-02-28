@@ -1,0 +1,7 @@
+Array Length: 100, nloop: 2000, CUDA event time: 0.000162816s, avg time for each sum : 8.1408e-10s
+Array Length: 1000, nloop: 2000, CUDA event time: 0.000940032s, avg time for each sum : 4.70016e-10s
+Array Length: 10000, nloop: 2000, CUDA event time: 0.000953344s, avg time for each sum : 4.76672e-11s
+Array Length: 100000, nloop: 2000, CUDA event time: 0.00272691s, avg time for each sum : 1.36346e-11s
+Array Length: 1000000, nloop: 2000, CUDA event time: 0.0227666s, avg time for each sum : 1.13833e-11s
+Array Length: 10000000, nloop: 2000, CUDA event time: 0.21052s, avg time for each sum : 1.0526e-11s
+Array Length: 100000000, nloop: 2000, CUDA event time: 1.8269s, avg time for each sum : 9.13448e-12s
