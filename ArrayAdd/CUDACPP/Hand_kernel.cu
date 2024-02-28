@@ -25,6 +25,18 @@ __global__ void ArrayAdd( ComplexD *A, ComplexD *B, ComplexD *C, int length, int
     }
 }
 
+__global__ void ArrayAdd_v2( ComplexD *A, ComplexD *B, ComplexD *C, int length, int nloop ){
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if( idx<length ){
+      // to be optimized
+      ComplexD AA=0.0;
+      for ( int iloop=0;iloop<nloop;iloop++){
+        AA += B[idx] + C[idx];
+      }
+      A[idx]=AA;
+    }
+}
+
 int main (int argc, char* argv[]){
 
     // CUDA_CHECK(cudaGetDeviceProperties());
@@ -106,6 +118,27 @@ int main (int argc, char* argv[]){
     // printf("Avgfac test : %g %g %g %g \n", double(long(arraylen)*long(nloop)), 1/double(arraylen*nloop), 1.0/double(arraylen*nloop), 1.0/double(arraylen)/double(nloop));
     printf("Array Length: %d, nloop: %d, CUDA event time: %gs, avg time for each sum : %gs \n", arraylen, nloop, elapsed_time_sum/1000.0, elapsed_time_sum*ms2s*avgfac);
     // printf("Array Length: %d, nloop: %d, CUDA event time: %gs, avg time for each array 1 loop : %gs \n", arraylen, nloop, elapsed_time_sum/1000.0, elapsed_time_sum/1000.0/double(nloop));
+
+
+    // version 2 
+    elapsed_time_sum=0.0;
+    CUDA_CHECK(cudaEventRecord(start, stream));
+    // for (int j=0; j<nloop; j++){ 
+    block_dim = BLOCK_SIZE_1D;
+    // dim3 block_dim = 32;
+    grid_dim = (arraylen+block_dim.x-1)/block_dim.x;
+    printf("%d %d\n", grid_dim.x,block_dim.x);
+    ArrayAdd_v2<<<grid_dim, block_dim>>>((ComplexD*)d_A, (ComplexD*)d_B, (ComplexD*)d_C, arraylen, nloop);
+    // ArrayAdd<<<grid_dim, block_dim>>>(arraylen, nloop);
+    CUDA_CHECK(cudaGetLastError());
+    // }
+    CUDA_CHECK(cudaEventRecord(stop, stream));
+    CUDA_CHECK(cudaEventSynchronize(stop));
+    CUDA_CHECK(cudaEventElapsedTime(&elapsed_time, start, stop));
+    elapsed_time_sum+=elapsed_time;
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    printf("Ver2 Array Length: %d, nloop: %d, CUDA event time: %gs, avg time for each sum : %gs \n", arraylen, nloop, elapsed_time_sum/1000.0, elapsed_time_sum*ms2s*avgfac);
 
     // CUDA_CHECK(cudaMemcpy(A, d_A, N*sizeof(cuDoubleComplex), cudaMemcpyDeviceToHost ));
 
