@@ -5,3 +5,26 @@ Array Length: 100000, nloop: 2000, CUDA event time: 0.00272691s, avg time for ea
 Array Length: 1000000, nloop: 2000, CUDA event time: 0.0227666s, avg time for each sum : 1.13833e-11s
 Array Length: 10000000, nloop: 2000, CUDA event time: 0.21052s, avg time for each sum : 1.0526e-11s
 Array Length: 100000000, nloop: 2000, CUDA event time: 1.8269s, avg time for each sum : 9.13448e-12s
+
+Array Length: 100, nloop: 2000, CUDA event time: 0.000162816s, avg time for each sum : 8.1408e-10s 
+Array Length: 1000, nloop: 2000, CUDA event time: 0.000940032s, avg time for each sum : 4.70016e-10s 
+Array Length: 10000, nloop: 2000, CUDA event time: 0.000953344s, avg time for each sum : 4.76672e-11s 
+Array Length: 100000, nloop: 2000, CUDA event time: 0.00272691s, avg time for each sum : 1.36346e-11s 
+Array Length: 1000000, nloop: 2000, CUDA event time: 0.0227666s, avg time for each sum : 1.13833e-11s 
+Array Length: 10000000, nloop: 2000, CUDA event time: 0.21052s, avg time for each sum : 1.0526e-11s 
+Array Length: 100000000, nloop: 2000, CUDA event time: 1.8269s, avg time for each sum : 9.13448e-12s 
+
+Array Length: 100, nloop: 200, CUDA event time: 2.8672e-05s, avg time for each sum : 1.4336e-09s 
+Ver2 Array Length: 100, nloop: 200, CUDA event time: 8.192e-06s, avg time for each sum : 4.096e-10s 
+Array Length: 1000, nloop: 200, CUDA event time: 0.000105472s, avg time for each sum : 5.2736e-10s 
+Ver2 Array Length: 1000, nloop: 200, CUDA event time: 1.7408e-05s, avg time for each sum : 8.704e-11s 
+Array Length: 10000, nloop: 200, CUDA event time: 0.0001024s, avg time for each sum : 5.12e-11s 
+Ver2 Array Length: 10000, nloop: 200, CUDA event time: 1.8432e-05s, avg time for each sum : 9.216e-12s 
+Array Length: 100000, nloop: 200, CUDA event time: 0.000280576s, avg time for each sum : 1.40288e-11s 
+Ver2 Array Length: 100000, nloop: 200, CUDA event time: 2.7648e-05s, avg time for each sum : 1.3824e-12s 
+Array Length: 1000000, nloop: 200, CUDA event time: 0.00230912s, avg time for each sum : 1.15456e-11s 
+Ver2 Array Length: 1000000, nloop: 200, CUDA event time: 0.00014336s, avg time for each sum : 7.168e-13s 
+Array Length: 10000000, nloop: 200, CUDA event time: 0.0213494s, avg time for each sum : 1.06747e-11s 
+Ver2 Array Length: 10000000, nloop: 200, CUDA event time: 0.00125235s, avg time for each sum : 6.26176e-13s 
+Array Length: 100000000, nloop: 200, CUDA event time: 0.181307s, avg time for each sum : 9.06537e-12s 
+Ver2 Array Length: 100000000, nloop: 200, CUDA event time: 0.0104407s, avg time for each sum : 5.22035e-13s 
