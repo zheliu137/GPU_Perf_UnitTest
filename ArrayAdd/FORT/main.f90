@@ -18,7 +18,7 @@ program ArrayAdd
     !
     integer,parameter :: DP = selected_real_kind(14,200)
     integer :: arraylen = 1000000
-    integer :: nloop = 100000
+    integer :: nloop = 10000
     complex(DP),allocatable :: A(:), B(:), C(:)
     integer :: i, iloop
     real(DP) :: x, y
@@ -38,21 +38,20 @@ program ArrayAdd
               B(arraylen), &
               C(arraylen)  )
 
-    DO iloop = 1, nloop
-        DO i = 1, arraylen
-            call random_number( x )
-            call random_number( y )
-            B(i) = cmplx(x,y,kind=DP)
-            call random_number( x )
-            call random_number( y )
-            C(i) = cmplx(x,y,kind=DP)
-        End Do
+    DO i = 1, arraylen
+        A(i) = 0.0
+        call random_number( x )
+        call random_number( y )
+        B(i) = cmplx(x,y,kind=DP)
+        call random_number( x )
+        call random_number( y )
+        C(i) = cmplx(x,y,kind=DP)
     End Do
 
     t_start = f_wall()
     do iloop = 1, nloop
         do i = 1, arraylen
-            A(i)=B(i)+C(i)
+            A(i)=A(i)+B(i)+C(i)
         end do
     end do
     t_end = f_wall()
