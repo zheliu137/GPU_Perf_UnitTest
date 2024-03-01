@@ -35,4 +35,5 @@ set y2tics textcolor rgb "red"
 plot 'comp.dat' u 1:2 w l lw 2 axis x1y1 title 'CPU-single core', 'comp.dat' u 1:3 w l lw 2 axis x1y1 title "GPU-one card-v1", \
      'comp.dat' u 1:4 w l lw 2 axis x1y1 title "GPU-one card-v2", \
      'comp.dat' u 1:($2/$3) w lp lw 2 lc rgb "red" axis x1y2 title 'speedup-v1', \
-     'comp.dat' u 1:($2/$4) w lp lw 2 linetype 1 dashtype 5 lc rgb "red" axis x1y2 title 'speedup-v2'
+     'comp.dat' u 1:($2/$4) w lp lw 2 linetype 1 dashtype 5 lc rgb "red" axis x1y2 title 'speedup-v2', \
+     'comp.dat' u 1:5 w lp lw 2 title 'gpu-zgemv'
