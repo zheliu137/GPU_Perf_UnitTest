@@ -1,0 +1,190 @@
+! #include <stdio.h>
+! #include <stdlib.h>
+! #include <math.h>
+! #include <algorithm>
+! #include <cuda_runtime.h>
+! #include "cublas_v2.h"
+! #include "cuda_settings.h"
+! #define IDX2F(i,j,ld) ((((j))*(ld))+((i)))
+! #define BLOCK_SIZE 32
+! #define BLOCK_SIZE_1D 1024
+
+! //void print_matrix(const int &m, const int &n, const cuDoubleComplex *A, const int &lda);
+! void createRandoms(int size, double *randomArray);
+
+! __global__ void ArrayAdd( ComplexD *A, ComplexD *B, ComplexD *C, int length, int nloop ){
+!     int idx = blockIdx.x * blockDim.x + threadIdx.x;
+!     if( idx<length ){
+!       // to be optimized
+!       for ( int iloop=0;iloop<nloop;iloop++){
+!         A[idx] += B[idx] + C[idx];
+!       }
+!     }
+! }
+
+MODULE kernels
+  implicit none
+INTEGER, PARAMETER :: DP = selected_real_kind(14,200)
+
+CONTAINS
+ATTRIBUTES(GLOBAL) SUBROUTINE ArrayAdd_v1( A, B, C, length, nloop )
+    integer :: idx
+    Complex(kind=DP),DEVICE :: A(*), B(*), C(*)
+    integer, value :: length, nloop
+    integer :: iloop
+    idx = blockIdx%x * blockDim%x + threadIdx%x + 1
+    if( idx<length ) then
+      do iloop = 1, nloop
+        A(idx) = A(idx) + B(idx) + C(idx)
+      ENDDO
+    endif
+END SUBROUTINE ArrayAdd_v1
+
+ATTRIBUTES(GLOBAL) SUBROUTINE ArrayAdd_v2( A, B, C, length, nloop )
+    integer :: idx
+    Complex(kind=DP),DEVICE :: A(*), B(*), C(*)
+    integer, value :: length, nloop
+    integer :: iloop
+    Complex(kind=DP), shared :: AA(32)
+    idx = blockIdx%x * blockDim%x + threadIdx%x + 1
+    if( idx<length ) then
+      AA(threadIdx%x+1)=0.0
+      do iloop=1,nloop
+        AA(threadIdx%x+1) = AA(threadIdx%x+1) + B(idx) + C(idx)
+      ENDDO
+      A(idx)=AA(threadIdx%x+1)
+    endif
+END SUBROUTINE ArrayAdd_v2
+
+END MODULE
+
+program ArrayAddTest
+    ! Compile with "pgfortran testisamax.cuf -Mcudalib=cublas -lblas"
+    ! Use the NVIDIA cudafor and cublas modules
+    use cudafor
+    use cublas
+    use cusolverDn
+    USE kernels
+    !
+    COMPLEX(KIND=DP), ALLOCATABLE         :: a(:), b(:), c(:)
+    COMPLEX(KIND=DP), DEVICE, ALLOCATABLE :: d_a(:), d_b(:), d_c(:)
+
+    integer :: arraylen = 1000000
+    integer :: nloop = 200
+
+    type (cudaEvent) :: startEvent, stopEvent, dummyEvent
+
+    real :: rtmp, itmp
+
+    real :: time
+    integer :: i, istat, offset
+
+    type(dim3) :: dimGrid, dimBlock
+
+
+    ALLOCATE(a(arraylen), b(arraylen), c(arraylen))
+    ALLOCATE(d_a(arraylen), d_b(arraylen), d_c(arraylen))
+
+    ! Initialize the arrays
+    DO i = 1, arraylen
+      a(i) = 0.0
+      CALL random_number(rtmp)
+      CALL random_number(itmp)
+      b(i) = Cmplx(rtmp, itmp, KIND=DP)
+      CALL random_number(rtmp)
+      CALL random_number(itmp)
+      c(i) = Cmplx(rtmp, itmp, KIND=DP)
+    END DO
+
+    d_a=0.0
+    d_b(:)=b(:)
+    d_c(:)=c(:)
+
+    ! create events
+    istat = cudaEventCreate(startEvent)
+    istat = cudaEventCreate(stopEvent)  
+    istat = cudaEventCreate(dummyEvent)  
+    
+    dimBlock = 32
+    dimGrid = (arraylen+dimBlock%x-1)/dimBlock%x
+    
+    istat = cudaEventRecord(startEvent,0)
+    
+    call ArrayAdd_v1<<<dimGrid,dimBlock>>>(d_a, d_b, d_c, arraylen, nloop)
+    
+    istat = cudaEventRecord(stopEvent,0)
+    istat = cudaEventSynchronize(stopEvent)
+    istat = cudaEventElapsedTime(time, startEvent, stopEvent)
+    write(*,*) 'Time for ArrayAdd_v1 execute (ms): ', time
+    
+    d_a=0.0
+    d_b(:)=b(:)
+    d_c(:)=c(:)
+
+    istat = cudaEventRecord(startEvent,0)
+    call ArrayAdd_v2<<<dimGrid,dimBlock>>>(d_a, d_b, d_c, arraylen, nloop)
+    istat = cudaEventRecord(stopEvent,0)
+    istat = cudaEventSynchronize(stopEvent)
+    istat = cudaEventElapsedTime(time, startEvent, stopEvent)
+    
+    write(*,*) 'Time for ArrayAdd_v2 execute (ms): ', time
+
+end program
+
+!     cudaEvent_t start, stop;    
+!     float elapsed_time;
+!     double elapsed_time_sum;
+!     CUDA_CHECK(cudaEventCreate(&start));
+!     CUDA_CHECK(cudaEventCreate(&stop));
+
+!     elapsed_time_sum=0.0;
+!     CUDA_CHECK(cudaEventRecord(start, stream));
+!     // for (int j=0; j<nloop; j++){ 
+!     dim3 block_dim = BLOCK_SIZE_1D;
+!     // dim3 block_dim = 32;
+!     dim3 grid_dim;
+!     grid_dim.x = (arraylen+block_dim.x-1)/block_dim.x;
+!     printf("%d %d\n", grid_dim.x,block_dim.x);
+!     ArrayAdd<<<grid_dim, block_dim>>>((ComplexD*)d_A, (ComplexD*)d_B, (ComplexD*)d_C, arraylen, nloop);
+!     // ArrayAdd<<<grid_dim, block_dim>>>(arraylen, nloop);
+!     CUDA_CHECK(cudaGetLastError());
+!     // }
+!     CUDA_CHECK(cudaEventRecord(stop, stream));
+!     CUDA_CHECK(cudaEventSynchronize(stop));
+!     CUDA_CHECK(cudaEventElapsedTime(&elapsed_time, start, stop));
+!     elapsed_time_sum+=elapsed_time;
+!     CUDA_CHECK(cudaDeviceSynchronize());
+
+!     double ms2s=0.001;
+!     double avgfac=1.0/double(arraylen)/double(nloop);
+!     // printf("Avgfac test : %g %g %g %g \n", double(long(arraylen)*long(nloop)), 1/double(arraylen*nloop), 1.0/double(arraylen*nloop), 1.0/double(arraylen)/double(nloop));
+!     printf("Array Length: %d, nloop: %d, CUDA event time: %gs, avg time for each sum : %gs \n", arraylen, nloop, elapsed_time_sum/1000.0, elapsed_time_sum*ms2s*avgfac);
+!     // printf("Array Length: %d, nloop: %d, CUDA event time: %gs, avg time for each array 1 loop : %gs \n", arraylen, nloop, elapsed_time_sum/1000.0, elapsed_time_sum/1000.0/double(nloop));
+
+
+!     // version 2 
+!     elapsed_time_sum=0.0;
+!     CUDA_CHECK(cudaEventRecord(start, stream));
+!     // for (int j=0; j<nloop; j++){ 
+!     block_dim = BLOCK_SIZE_1D;
+!     // dim3 block_dim = 32;
+!     grid_dim = (arraylen+block_dim.x-1)/block_dim.x;
+!     printf("%d %d\n", grid_dim.x,block_dim.x);
+!     ArrayAdd_v2<<<grid_dim, block_dim>>>((ComplexD*)d_A, (ComplexD*)d_B, (ComplexD*)d_C, arraylen, nloop);
+!     // ArrayAdd<<<grid_dim, block_dim>>>(arraylen, nloop);
+!     CUDA_CHECK(cudaGetLastError());
+!     // }
+!     CUDA_CHECK(cudaEventRecord(stop, stream));
+!     CUDA_CHECK(cudaEventSynchronize(stop));
+!     CUDA_CHECK(cudaEventElapsedTime(&elapsed_time, start, stop));
+!     elapsed_time_sum+=elapsed_time;
+!     CUDA_CHECK(cudaDeviceSynchronize());
+
+!     printf("Ver2 Array Length: %d, nloop: %d, CUDA event time: %gs, avg time for each sum : %gs \n", arraylen, nloop, elapsed_time_sum/1000.0, elapsed_time_sum*ms2s*avgfac);
+
+!     // CUDA_CHECK(cudaMemcpy(A, d_A, N*sizeof(cuDoubleComplex), cudaMemcpyDeviceToHost ));
+
+!     // printf("The value of A[%d] is %30.15g + %30.15g i \n", 12000, A[11999].x, A[11999].y);
+!     /*
+!     */
+! }
